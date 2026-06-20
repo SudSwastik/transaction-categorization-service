@@ -1,0 +1,91 @@
+# ── Environment ──────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.env
+
+# ── Python ───────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+.uv/
+
+# ── Type checking & linting ──────────────────────────────────────
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+
+# ── Testing ──────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+
+# ── Alembic ──────────────────────────────────────────────────────
+# Keep versions/ tracked; ignore only generated temp files
+*.pyc
+
+# ── sentence-transformers model cache ────────────────────────────
+# Models are baked into the Docker image — don't commit the local cache
+backend/.cache/
+backend/app/services/.model_cache/
+~/.cache/huggingface/
+
+# ── Uploads (local dev) ──────────────────────────────────────────
+# The Docker volume handles this in production; local dev may write here
+backend/uploads/
+uploads/
+
+# ── Node / Next.js ───────────────────────────────────────────────
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.turbo/
+frontend/.swc/
+frontend/coverage/
+
+# ── OS ───────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── IDE ──────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ── Docker ───────────────────────────────────────────────────────
+# Don't commit local override with personal secrets
+docker-compose.override.yml
+
+# ── Secrets & keys ───────────────────────────────────────────────
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+
+# ── Logs ─────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Test fixtures with real financial data ───────────────────────
+# Keep synthetic fixtures; exclude anything with real account data
+tests/fixtures/real/
+backend/tests/fixtures/real/
+
+
+# ── Miscellaneous ───────────────────────────────────────────────
+IMPLEMENTATION_PLAN.md
+ROADMAP.md
