@@ -39,10 +39,14 @@ class Settings(BaseSettings):
     # Generate: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
     ENCRYPTION_KEY: str = ""
 
-    # ── File Storage ─────────────────────────────────────────────
-    STORAGE_BACKEND: Literal["local", "s3"] = "local"
-    STORAGE_ROOT: str = "/app/uploads"
-    MAX_UPLOAD_SIZE_BYTES: int = 52_428_800  # 50 MB
+    # ── File Storage (MinIO / S3) ─────────────────────────────────
+    STORAGE_BACKEND: Literal["local", "s3"] = "s3"
+    AWS_ENDPOINT_URL: str = "http://minio:9000"   # override to "" for real AWS S3
+    AWS_BUCKET: str = "txcat-uploads"
+    AWS_ACCESS_KEY_ID: str = "txcat"
+    AWS_SECRET_ACCESS_KEY: str = "txcat_dev_minio"
+    AWS_REGION: str = "us-east-1"                 # MinIO ignores this but boto3 requires it
+    MAX_UPLOAD_SIZE_BYTES: int = 52_428_800        # 50 MB
 
     # ── Embeddings ───────────────────────────────────────────────
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
@@ -54,6 +58,10 @@ class Settings(BaseSettings):
     STAGE2_MIN_MATCH_COUNT: int = 5
     STAGE3_CONFIDENCE_THRESHOLD: float = 0.92
     CATEGORIZATION_BATCH_SIZE: int = 20
+
+    # ── Currencies ───────────────────────────────────────────────
+    SUPPORTED_CURRENCIES: list[str] = ["INR", "USD", "EUR", "GBP", "CAD", "AUD"]
+    DEFAULT_BASE_CURRENCY: str = "INR"
 
     # ── Analytics ────────────────────────────────────────────────
     ANALYTICS_CACHE_TTL_SECONDS: int = 1800  # 30 min
