@@ -50,7 +50,7 @@ python scripts/create_tenant.py              # create a tenant + owner user
 | Vector DB | pgvector on PostgreSQL (HNSW index) | Single DB for relational + vectors; 384 dims is well within pgvector's performance range at this scale |
 | Queue | Celery + Redis with 4 named queues | `llm` queue is rate-limited separately (10 calls/min per tenant); `learning` queue runs async after user feedback |
 | Auth | Auth0 free tier + custom post-login Action | Auth0 Organizations (paid) not needed — we manage tenants ourselves; Action injects `tenant_id`, `user_id`, `role` into JWT |
-| File storage | Docker named volume (`uploads`) via `StorageService` abstraction | Self-hosted Docker Compose; `STORAGE_BACKEND=s3` env var switches to S3 with no code changes |
+| File storage | MinIO (S3-compatible) via `StorageService` abstraction | Same boto3 client works against MinIO locally and real AWS S3 in production — change 3 env vars |
 
 ---
 
