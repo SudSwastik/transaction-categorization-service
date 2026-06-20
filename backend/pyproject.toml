@@ -19,7 +19,7 @@ dependencies = [
     "email-validator>=2.1.0",
     # Task queue
     "celery[redis]>=5.4.0",
-    "redbeat>=2.2.0",
+    "celery-redbeat>=2.2.0",
     # AI / ML
     "anthropic>=0.28.0",
     "sentence-transformers>=3.0.0",
