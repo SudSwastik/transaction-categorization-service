@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.v1.routers import auth as auth_router
 from app.core.config import get_settings
 from app.observability.logging import setup_logging
 
@@ -36,6 +37,8 @@ def create_app() -> FastAPI:
     @app.get("/health", tags=["system"])
     async def health() -> dict[str, str]:
         return {"status": "ok", "version": settings.VERSION}
+
+    app.include_router(auth_router.router, prefix="/api/v1")
 
     return app
 
