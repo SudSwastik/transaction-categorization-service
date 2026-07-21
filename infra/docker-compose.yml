@@ -64,6 +64,24 @@ services:
       minio:
         condition: service_healthy
 
+  celery-worker-default:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+      target: dev
+    command: celery -A app.tasks.celery_app worker -Q default -c 4 --loglevel=info
+    volumes:
+      - ../backend:/app
+    env_file:
+      - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
 volumes:
   postgres_data:
   redis_data:

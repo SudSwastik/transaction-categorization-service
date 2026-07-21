@@ -5,8 +5,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.routers import auth as auth_router
+from app.api.v1.routers import statements as statements_router
 from app.core.config import get_settings
 from app.observability.logging import setup_logging
+from app.services.storage_service import get_storage_service
 
 settings = get_settings()
 
@@ -14,6 +16,7 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     setup_logging(log_level=settings.LOG_LEVEL, environment=settings.ENVIRONMENT)
+    get_storage_service().ensure_bucket()
     yield
 
 
@@ -39,6 +42,7 @@ def create_app() -> FastAPI:
         return {"status": "ok", "version": settings.VERSION}
 
     app.include_router(auth_router.router, prefix="/api/v1")
+    app.include_router(statements_router.router, prefix="/api/v1")
 
     return app
 

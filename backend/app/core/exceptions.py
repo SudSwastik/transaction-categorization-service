@@ -29,3 +29,13 @@ class NotFoundError(HTTPException):
 class ConflictError(HTTPException):
     def __init__(self, detail: str = "Resource conflict") -> None:
         super().__init__(status_code=status.HTTP_409_CONFLICT, detail=detail)
+
+
+class PayloadTooLargeError(HTTPException):
+    def __init__(self, detail: str = "Payload too large") -> None:
+        super().__init__(status_code=status.HTTP_413_CONTENT_TOO_LARGE, detail=detail)
+
+
+class UnsupportedMediaTypeError(HTTPException):
+    def __init__(self, detail: str = "Unsupported media type") -> None:
+        super().__init__(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=detail)
