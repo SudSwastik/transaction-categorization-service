@@ -6,6 +6,7 @@ from decimal import Decimal
 from redis.asyncio import Redis
 
 from app.core.config import get_settings
+from app.db.models.transaction import Transaction
 
 # Common processor/network prefixes that precede the merchant name, not part of it.
 _STRIP_PREFIX_RE = re.compile(
@@ -92,6 +93,18 @@ class NormalizationAgent:
         rate = await self._get_fx_rate(source_currency, base_currency, redis)
         amount_base = (raw_amount * rate).quantize(Decimal("0.0001"))
         return NormalizedAmount(amount_base=amount_base, fx_rate_used=rate, fx_rate_date=today)
+
+    def _detect_duplicate(
+        self, candidates: list[Transaction], transaction_date: date
+    ) -> Transaction | None:
+        """Applies the Layer 2 dedup date window (±1 day, matches posted vs.
+        transaction date drift between statement versions) to a candidate set
+        already narrowed by exact user/merchant/amount match — see
+        TransactionRepository.find_candidates_for_dedup."""
+        for candidate in candidates:
+            if abs((candidate.transaction_date - transaction_date).days) <= 1:
+                return candidate
+        return None
 
     async def _get_fx_rate(
         self, source_currency: str, base_currency: str, redis: Redis | None
