@@ -60,7 +60,7 @@ class StorageService:
         max_upload_size_bytes: int,
     ) -> None:
         self._bucket = bucket
-        self._max_upload_size_bytes = max_upload_size_bytes
+        self.max_upload_size_bytes = max_upload_size_bytes
         self._client: BaseClient = boto3.client(
             "s3",
             endpoint_url=endpoint_url or None,
@@ -81,8 +81,8 @@ class StorageService:
 
     def save(self, *, tenant_id: uuid.UUID, filename: str, content: bytes) -> SavedFile:
         size_bytes = len(content)
-        if size_bytes > self._max_upload_size_bytes:
-            raise FileTooLargeError(size_bytes, self._max_upload_size_bytes)
+        if size_bytes > self.max_upload_size_bytes:
+            raise FileTooLargeError(size_bytes, self.max_upload_size_bytes)
 
         detected_mime = magic.from_buffer(content, mime=True)
         extension = ALLOWED_MIME_TYPES.get(detected_mime)
