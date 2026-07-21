@@ -1,9 +1,16 @@
 import io
+import re
 from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 
 from openpyxl import load_workbook
+
+# Matches the numeric portion of an amount cell after commas are stripped, e.g.
+# "$1234.56" -> "1234.56", "USD 1234.56" -> "1234.56". Sign is handled separately
+# since bank exports mark negatives with parentheses or a trailing "-" as often
+# as a leading one.
+_AMOUNT_NUMERIC_RE = re.compile(r"-?\d[\d,]*\.?\d*")
 
 # Header keywords are matched as case-insensitive substrings against each cell in
 # a candidate header row — statements from different banks label the same column
@@ -120,23 +127,47 @@ class StatementAgent:
 
     def _extract_amount(self, row: tuple[object, ...], columns: dict[str, int]) -> Decimal | None:
         if "amount" in columns:
-            return self._to_decimal(row[columns["amount"]])
+            return self._parse_amount(row[columns["amount"]])
 
-        debit = self._to_decimal(row[columns["debit"]]) if "debit" in columns else None
-        credit = self._to_decimal(row[columns["credit"]]) if "credit" in columns else None
+        debit = self._parse_amount(row[columns["debit"]]) if "debit" in columns else None
+        credit = self._parse_amount(row[columns["credit"]]) if "credit" in columns else None
         if debit:
             return -abs(debit)
         if credit:
             return abs(credit)
         return None
 
-    def _to_decimal(self, value: object) -> Decimal | None:
+    def _parse_amount(self, value: object) -> Decimal | None:
+        """Parses an amount cell that may be a raw number or bank-formatted text:
+        parenthesized negatives `(1,234.56)`, trailing-minus negatives `1234.56-`,
+        thousands separators, and currency prefixes/suffixes (`$`, `USD`, ...)."""
         if value is None or value == "":
             return None
-        try:
+        if isinstance(value, int | float | Decimal):
             return Decimal(str(value))
+
+        text = str(value).strip()
+        if not text:
+            return None
+
+        negative = False
+        if text.startswith("(") and text.endswith(")"):
+            negative = True
+            text = text[1:-1]
+        elif text.endswith("-"):
+            negative = True
+            text = text[:-1]
+
+        match = _AMOUNT_NUMERIC_RE.search(text.replace(",", ""))
+        if match is None:
+            return None
+
+        try:
+            amount = Decimal(match.group())
         except InvalidOperation:
             return None
+
+        return -abs(amount) if negative else amount
 
     def _coerce_date(self, value: object) -> date | None:
         if isinstance(value, datetime):
