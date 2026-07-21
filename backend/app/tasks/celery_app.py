@@ -31,4 +31,8 @@ celery_app.conf.update(
     },
     beat_scheduler="redbeat.RedBeatScheduler",
     redbeat_redis_url=settings.REDIS_URL,
+    # Task modules aren't imported anywhere else, so @celery_app.task decorators
+    # never run and the worker registers nothing — explicitly list each module
+    # here as it's added (append, don't rely on autodiscovery for this layout).
+    imports=("app.tasks.statement_tasks",),
 )
