@@ -8,6 +8,20 @@ from app.db.models.transaction import Transaction
 
 
 class TransactionRepository:
+    async def bulk_create(self, db: AsyncSession, transactions: list[Transaction]) -> list[Transaction]:
+        db.add_all(transactions)
+        await db.flush()
+        return transactions
+
+    async def get_by_statement(self, db: AsyncSession, statement_id: uuid.UUID) -> list[Transaction]:
+        result = await db.execute(
+            select(Transaction).where(
+                Transaction.statement_id == statement_id,
+                Transaction.deleted_at.is_(None),
+            )
+        )
+        return list(result.scalars().all())
+
     async def find_candidates_for_dedup(
         self,
         db: AsyncSession,
